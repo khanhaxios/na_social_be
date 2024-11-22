@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         servers = @Server(
                 description = "LOCAL ENV",
-                url = "http://127.0.0.1:8082/api"
+                url = "http://127.0.0.1:8088/api"
         )
 )
 @SecurityScheme(

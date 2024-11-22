@@ -44,11 +44,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<ApiResponse> createOrGetUser(CreateUserRequest request) {
         User user = userRepository.findByUsername(request.getUsername()).orElse(null);
+        // case reg new user
         if (user == null) {
             user = new User();
             BeanUtils.copyProperties(request, user);
             user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
             user.setUid(request.getUid());
+        }
+        // case login with email and password
+        if (request.getPassword() != null && user.getPassword() != null) {
+            if (!new BCryptPasswordEncoder().matches(request.getPassword(), user.getPassword())) {
+                List<String> message = new ArrayList<>();
+                message.add("Password incorrect");
+                return Responser.badRequest(message);
+            }
         }
         user.setRoleType(RoleType.ROLE_USER);
         user.setSessionToken(request.getToken());
@@ -86,7 +95,7 @@ public class UserServiceImpl implements UserService {
             return Responser.notFound();
         }
         String code = SecurityHelper.generateRandomNumberString(6);
-        String message = String.format("Confirm forgot password code : ", code);
+        String message = String.format("Confirm forgot password code : %s ", code);
         mailService.sendMailAsync(email, message, "Confirm your forgot password request");
         user.setVerifyCode(code);
         user.setVerifyExpired(Instant.now().plus(Duration.ofMinutes(15)));

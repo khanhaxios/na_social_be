@@ -41,9 +41,25 @@ public class Feed {
     private Set<UserReact> userReacted = new HashSet<>();
 
     private boolean showing = true;
-    
+
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void addComment(Comment savedComment) {
+        this.comments.add(savedComment);
+    }
+
+    public void removeComment(Comment comment) {
+        this.comments.remove(comment);
+    }
+
+    public void addOrRemoveReaction(UserReact userReact) {
+        if (this.userReacted.contains(userReact)) {
+            this.userReacted.remove(userReact);
+        } else {
+            this.userReacted.add(userReact);
+        }
+    }
 }

@@ -1,8 +1,6 @@
 package com.NA.social.core.service.feed;
 
-import com.NA.social.core.entity.Feed;
-import com.NA.social.core.entity.Media;
-import com.NA.social.core.entity.User;
+import com.NA.social.core.entity.*;
 import com.NA.social.core.enums.FeedPrivacy;
 import com.NA.social.core.repository.CommentRepository;
 import com.NA.social.core.repository.FeedRepository;
@@ -95,11 +93,37 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public ResponseEntity<ApiResponse> commentFeed(CreateCommentFeedRequest request) {
-        return null;
+        Feed feed = feedRepository.findById(request.getFeedId()).orElse(null);
+        User user = SecurityHelper.getAccountFromLogged(userRepository);
+        if (user == null) {
+            return Responser.unAuth();
+        }
+        if (feed == null) {
+            return Responser.notFound();
+        }
+        Comment comment = new Comment();
+        comment.setContent(request.getContent());
+        comment.setCommenter(user);
+        comment.setParentComment(commentRepository.findById(request.getParentId()).orElse(null));
+        Comment savedComment = commentRepository.save(comment);
+        feed.addComment(savedComment);
+        feedRepository.save(feed);
+        return Responser.success(savedComment);
     }
 
     @Override
     public ResponseEntity<ApiResponse> reactFeed(Long feedId) {
-        return null;
+        User user = SecurityHelper.getAccountFromLogged(userRepository);
+        Feed feed = feedRepository.findById(feedId).orElse(null);
+        if (user == null) {
+            return Responser.unAuth();
+        }
+        if (feed == null) {
+            return Responser.notFound();
+        }
+        UserReact userReact = feed.getUserReacted().stream().filter(s -> s.getUserId().equals(user.getUid())).toList().get(0);
+        feed.addOrRemoveReaction(userReact);
+        feedRepository.save(feed);
+        return Responser.success();
     }
 }

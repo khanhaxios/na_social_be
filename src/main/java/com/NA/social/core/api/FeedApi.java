@@ -1,5 +1,6 @@
 package com.NA.social.core.api;
 
+import com.NA.social.core.request.feed.CreateCommentFeedRequest;
 import com.NA.social.core.request.feed.CreateFeedRequest;
 import com.NA.social.core.request.feed.UpdateFeedRequest;
 import com.NA.social.core.service.feed.FeedService;
@@ -66,6 +67,24 @@ public class FeedApi {
     public ResponseEntity<?> deleteFeed(@PathVariable("id") Long id) {
         try {
             return feedService.deleteFeed(id);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+    @PostMapping("/comment-feed")
+    public ResponseEntity<?> commentFeed(@RequestBody CreateCommentFeedRequest request) {
+        try {
+            return feedService.commentFeed(request);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+    @PutMapping("/react-feed/{id}")
+    public ResponseEntity<?> commentFeed(@PathVariable(name = "id") Long feedId) {
+        try {
+            return feedService.reactFeed(feedId);
         } catch (Exception e) {
             return Responser.serverError(e.getMessage());
         }
