@@ -1,6 +1,7 @@
 package com.NA.social.core.api;
 
 import com.NA.social.core.request.user.CreateUserRequest;
+import com.NA.social.core.request.user.ResgiterRequest;
 import com.NA.social.core.service.user.UserService;
 import com.NA.social.core.ultis.Responser;
 import jakarta.validation.Valid;
@@ -19,6 +20,16 @@ public class AuthApi {
     ResponseEntity<?> login(@Valid @RequestBody CreateUserRequest request) {
         try {
             return userService.createOrGetUser(request);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/new-user")
+    ResponseEntity<?> registerNewUser(@RequestBody ResgiterRequest request) {
+        try {
+            return userService.newUser(request);
         } catch (Exception e) {
             return Responser.serverError(e.getMessage());
         }

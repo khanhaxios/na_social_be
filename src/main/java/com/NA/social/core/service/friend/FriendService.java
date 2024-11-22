@@ -13,5 +13,5 @@ public interface FriendService {
 
     public ResponseEntity<?> getListFriend(Pageable pageable);
 
-    public ResponseEntity<?> searchFriend(Pageable pageable);
+    public ResponseEntity<?> searchFriend(Pageable pageable, String query);
 }

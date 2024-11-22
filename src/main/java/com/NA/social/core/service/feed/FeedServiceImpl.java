@@ -38,7 +38,11 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public ResponseEntity<ApiResponse> getNewsFeed(Pageable pageable) {
-        return null;
+        User currentUser = SecurityHelper.getAccountFromLogged(userRepository);
+        if (currentUser == null) {
+            return Responser.unAuth();
+        }
+        return Responser.success(feedRepository.getNewsFeed(pageable, currentUser.getUid()));
     }
 
     @Override

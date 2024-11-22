@@ -6,6 +6,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Random;
+
 public class SecurityHelper {
     public static boolean isLogged() {
         return SecurityContextHolder.getContext().getAuthentication() != null;
@@ -14,6 +16,18 @@ public class SecurityHelper {
     public static void setAuthentication(UsernamePasswordAuthenticationToken token) {
         SecurityContextHolder.getContext().setAuthentication(token);
     }
+    public static String generateRandomNumberString(int length) {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int digit = random.nextInt(10); // Generates a random number between 0 and 9
+            sb.append(digit);
+        }
+
+        return sb.toString();
+    }
+
 
     public static String getLoggedUser() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

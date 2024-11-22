@@ -4,8 +4,10 @@ import com.NA.social.core.entity.User;
 import com.NA.social.core.enums.RoleType;
 import com.NA.social.core.repository.UserRepository;
 import com.NA.social.core.request.user.CreateUserRequest;
+import com.NA.social.core.request.user.ResgiterRequest;
 import com.NA.social.core.request.user.UpdateUserProfileRequest;
 import com.NA.social.core.service.jwt.JwtService;
+import com.NA.social.core.service.mail.MailService;
 import com.NA.social.core.ultis.ApiResponse;
 import com.NA.social.core.ultis.Responser;
 import com.NA.social.core.ultis.SecurityHelper;
@@ -17,7 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -26,6 +33,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    private final MailService mailService;
     private final JwtService jwtService;
 
     @Override
@@ -40,6 +48,7 @@ public class UserServiceImpl implements UserService {
             user = new User();
             BeanUtils.copyProperties(request, user);
             user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+            user.setUid(request.getUid());
         }
         user.setRoleType(RoleType.ROLE_USER);
         user.setSessionToken(request.getToken());
@@ -63,5 +72,44 @@ public class UserServiceImpl implements UserService {
             user.setDisplayName(request.getDisplayName());
         }
         return Responser.success(userRepository.save(user));
+    }
+
+    @Override
+    public ResponseEntity<?> newUser(ResgiterRequest request) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<?> sendForgotPasswordRequest(String email) {
+        User user = userRepository.findByUsername(email).orElse(null);
+        if (user == null) {
+            return Responser.notFound();
+        }
+        String code = SecurityHelper.generateRandomNumberString(6);
+        String message = String.format("Confirm forgot password code : ", code);
+        mailService.sendMailAsync(email, message, "Confirm your forgot password request");
+        user.setVerifyCode(code);
+        user.setVerifyExpired(Instant.now().plus(Duration.ofMinutes(15)));
+        userRepository.save(user);
+        return Responser.success();
+    }
+
+    @Override
+    public ResponseEntity<?> confirmForgotPassword(String code, String email) {
+        User user = userRepository.findByUsername(email).orElse(null);
+        if (user == null) {
+            return Responser.notFound();
+        }
+        if (Instant.now().isBefore(user.getVerifyExpired())) {
+            List<String> message = new ArrayList<>();
+            message.add("Expired Time");
+            return Responser.badRequest(message);
+        }
+        String newPassword = new BCryptPasswordEncoder().encode(SecurityHelper.generateRandomNumberString(12));
+        user.setPassword(newPassword);
+        // send mail
+        userRepository.save(user);
+        mailService.sendMailAsync(email, String.format("New password : %s", newPassword), "Your new password");
+        return Responser.success();
     }
 }

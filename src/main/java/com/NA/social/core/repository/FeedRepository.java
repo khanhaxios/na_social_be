@@ -18,4 +18,16 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     Page<Feed> findByVisibilityPublicOrOnlyFriend(Pageable pageable, @Param("user") String userId, @Param("public") FeedPrivacy feedPrivacy, @Param("only") FeedPrivacy feedPrivacy1);
 
     Page<Feed> findAllByAuthorAndPrivacy(Pageable pageable, User user, FeedPrivacy privacy);
+
+    @Query("  SELECT f \n" +
+            "    FROM Feed f \n" +
+            "    WHERE f.author.uid IN (\n" +
+            "        SELECT CASE \n" +
+            "                   WHEN fr.sender.uid = :userId THEN fr.receiver.uid \n" +
+            "                   ELSE fr.sender.uid \n" +
+            "               END\n" +
+            "        FROM Friend fr\n" +
+            "        WHERE fr.sender.uid = :userId OR fr.receiver.uid = :userId\n" +
+            "    ) order by f.createdAt desc ")
+    Page<Feed> getNewsFeed(Pageable pageable, @Param("userId") String userId);
 }

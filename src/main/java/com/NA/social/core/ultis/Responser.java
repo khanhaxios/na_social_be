@@ -1,5 +1,6 @@
 package com.NA.social.core.ultis;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
@@ -33,5 +34,9 @@ public class Responser {
 
     public static ResponseEntity<ApiResponse> notFound() {
         return ResponseEntity.notFound().build();
+    }
+
+    public static ResponseEntity<ApiResponse> unAuth() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 }
