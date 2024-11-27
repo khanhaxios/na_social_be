@@ -28,6 +28,6 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
             "               END\n" +
             "        FROM Friend fr\n" +
             "        WHERE fr.sender.uid = :userId OR fr.receiver.uid = :userId\n" +
-            "    ) order by f.createdAt desc ")
-    Page<Feed> getNewsFeed(Pageable pageable, @Param("userId") String userId);
+            "    ) AND f.privacy =:privacy order by f.createdAt desc")
+    Page<Feed> getNewsFeed(Pageable pageable, @Param("userId") String userId,@Param("privacy") FeedPrivacy privacy);
 }

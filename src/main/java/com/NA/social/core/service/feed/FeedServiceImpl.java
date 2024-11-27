@@ -22,6 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -40,7 +43,8 @@ public class FeedServiceImpl implements FeedService {
         if (currentUser == null) {
             return Responser.unAuth();
         }
-        return Responser.success(feedRepository.getNewsFeed(pageable, currentUser.getUid()));
+        return getMyFeed(pageable);
+//        return Responser.success(feedRepository.getNewsFeed(pageable, currentUser.getUid(), FeedPrivacy.PUBLIC));
     }
 
     @Override
@@ -67,7 +71,8 @@ public class FeedServiceImpl implements FeedService {
         newFeed.setAuthor(SecurityHelper.getAccountFromLogged(userRepository));
         newFeed.setCaption(request.getCaption());
         newFeed.setPrivacy(request.getPrivacy());
-        newFeed.getMedia().addAll(mediaRepository.findAllById(request.getMediaIds()));
+        List<Media> media = mediaRepository.findAllById(request.getMediaIds());
+        newFeed.getMedia().addAll(media);
         return Responser.success(feedRepository.save(newFeed));
     }
 

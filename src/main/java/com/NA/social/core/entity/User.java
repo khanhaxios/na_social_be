@@ -1,10 +1,7 @@
 package com.NA.social.core.entity;
 
 import com.NA.social.core.enums.RoleType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +38,7 @@ public class User implements UserDetails {
 
     private String coveUrl;
 
+    @Column(columnDefinition = "TEXT")
     private String sessionToken;
 
     private String displayName;

@@ -25,6 +25,7 @@ public class Feed {
     private String caption;
 
     @ManyToOne
+    @JoinColumn(name = "author_id")
     private User author;
 
     @Enumerated(EnumType.STRING)

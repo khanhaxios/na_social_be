@@ -5,6 +5,7 @@ import com.NA.social.core.ultis.ApiResponse;
 import com.NA.social.core.ultis.Responser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

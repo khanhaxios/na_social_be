@@ -18,4 +18,6 @@ public interface UserService {
     ResponseEntity<?> sendForgotPasswordRequest(String email);
 
     ResponseEntity<?> confirmForgotPassword(String code, String email);
+
+    ResponseEntity<?> loginWithEmailAndPassword(String email, String password);
 }

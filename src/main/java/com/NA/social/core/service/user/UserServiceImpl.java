@@ -22,9 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -48,10 +46,12 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = new User();
             BeanUtils.copyProperties(request, user);
-            user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+            if (request.getPassword() != null) {
+                user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+            }
             user.setUid(request.getUid());
         }
-        // case login with email and password
+
         if (request.getPassword() != null && user.getPassword() != null) {
             if (!new BCryptPasswordEncoder().matches(request.getPassword(), user.getPassword())) {
                 List<String> message = new ArrayList<>();
@@ -85,7 +85,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<?> newUser(ResgiterRequest request) {
-        return null;
+        User user = new User();
+        BeanUtils.copyProperties(request, user);
+        user.setRoleType(RoleType.ROLE_USER);
+        user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+        user.setAvatar(request.getAvatar());
+        user.setApiToken(jwtService.signToken(user));
+        return Responser.success(userRepository.save(user));
     }
 
     @Override
@@ -120,5 +126,22 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         mailService.sendMailAsync(email, String.format("New password : %s", newPassword), "Your new password");
         return Responser.success();
+    }
+
+    @Override
+    public ResponseEntity<?> loginWithEmailAndPassword(String email, String password) {
+        User user = userRepository.findByUsername(email).orElse(null);
+        if (user == null) {
+            return Responser.notFound();
+        }
+        if (password != null && user.getPassword() != null) {
+            if (!new BCryptPasswordEncoder().matches(password, user.getPassword())) {
+                List<String> message = new ArrayList<>();
+                message.add("Password incorrect");
+                return Responser.badRequest(message);
+            }
+        }
+        user.setApiToken(jwtService.signToken(user));
+        return Responser.success(user);
     }
 }

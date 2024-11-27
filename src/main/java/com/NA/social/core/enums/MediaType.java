@@ -2,7 +2,7 @@ package com.NA.social.core.enums;
 
 public enum MediaType {
     VIDEO("video", "video/mp4", "video/x-msvideo"),
-    IMAGE("image", "image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"),
+    IMAGE("image", "image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp","image/*"),
     FILE_DOCX("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     FILE_PDF("pdf", "application/pdf"),
     FILE_COMPRESS("compress", "application/zip", "application/x-rar-compressed"),
