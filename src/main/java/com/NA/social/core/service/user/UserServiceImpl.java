@@ -144,4 +144,9 @@ public class UserServiceImpl implements UserService {
         user.setApiToken(jwtService.signToken(user));
         return Responser.success(user);
     }
+
+    @Override
+    public ResponseEntity<?> getByEmail(String email) {
+        return Responser.success(userRepository.findByUsername(email));
+    }
 }

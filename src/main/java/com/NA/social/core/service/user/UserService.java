@@ -20,4 +20,6 @@ public interface UserService {
     ResponseEntity<?> confirmForgotPassword(String code, String email);
 
     ResponseEntity<?> loginWithEmailAndPassword(String email, String password);
+
+    ResponseEntity<?> getByEmail(String email);
 }

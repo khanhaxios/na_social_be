@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ResponseAddFriendRequest {
     private Long requestId;
-    private boolean isAccept;
+    private int response;
 }

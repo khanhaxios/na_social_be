@@ -18,6 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class FriendServiceImpl implements FriendService {
     private Notification createNotification(User owner, String content, Object data) {
         Notification notification = new Notification();
         notification.setContent(content);
-        notification.setData(new Gson().toJson(data));
+//        notification.setData(new Gson().toJson(data));
         notification.setType(NotificationType.FRIEND);
         notification.setOwner(owner);
         return notificationRepository.save(notification);
@@ -71,11 +72,11 @@ public class FriendServiceImpl implements FriendService {
         if (friend == null) {
             return Responser.notFound();
         }
-        friend.setStatus(request.isAccept() ? FriendStatus.BE_FRIEND : FriendStatus.DECLINE);
+        friend.setStatus(request.getResponse() == 1 ? FriendStatus.BE_FRIEND : FriendStatus.DECLINE);
         // notification to users
         Friend savedFriend = friendRepository.save(friend);
-        Notification senderNoti = createNotification(friend.getSender(), String.format("%s %s be your friend", friend.getReceiver().getUsername(), request.isAccept() ? "accepted" : "denied"), friend);
-        Notification receiverNotification = createNotification(friend.getReceiver(), String.format("You are %s friend with %s", request.isAccept() ? "be a" : "not be a", friend.getSender().getUsername()), friend);
+        Notification senderNoti = createNotification(friend.getSender(), String.format("%s %s be your friend", friend.getReceiver().getUsername(), request.getResponse() == 1 ? "accepted" : "denied"), friend);
+        Notification receiverNotification = createNotification(friend.getReceiver(), String.format("You are %s friend with %s", request.getResponse() == 1 ? "be a" : "not be a", friend.getSender().getUsername()), friend);
         notificationHelper.sendNotificationToUser(friend.getReceiver().getUsername(), "/friend", receiverNotification);
         notificationHelper.sendNotificationToUser(friend.getSender().getUsername(), "/friend", senderNoti);
         return Responser.success(savedFriend);
@@ -97,11 +98,21 @@ public class FriendServiceImpl implements FriendService {
         if (currentUser == null) {
             return Responser.unAuth();
         }
-        return Responser.success(friendRepository.findAllMyFriend(pageable, currentUser.getUid()));
+        return Responser.success(friendRepository.findAllMyFriend(pageable, currentUser.getUid(), FriendStatus.BE_FRIEND));
     }
 
     @Override
     public ResponseEntity<?> searchFriend(Pageable pageable, String username) {
         return Responser.success(friendRepository.findAllMyFriendWithLike(pageable, username));
+    }
+
+    @Override
+    public ResponseEntity<?> findAllRequest(Pageable pageable) {
+        User user = SecurityHelper.getAccountFromLogged(userRepository);
+        if (user == null) {
+            return Responser.notFound();
+        }
+        Page<Friend> page = friendRepository.findAllByReceiverAndStatus(pageable, user.getUid(), FriendStatus.WAITING_ACCEPT);
+        return Responser.success(page);
     }
 }

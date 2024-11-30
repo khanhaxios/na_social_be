@@ -27,11 +27,21 @@ public class FriendApi {
         }
     }
 
+    @GetMapping("/all-request")
+    ResponseEntity<?> getAllFriendRequest(Pageable pageable) {
+        try {
+            return friendService.findAllRequest(pageable);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
     @PostMapping("/response-add-friend-request")
     ResponseEntity<?> responseAddFriendRequest(@RequestBody ResponseAddFriendRequest request) {
         try {
             return friendService.responseAddFriendRequest(request);
         } catch (Exception e) {
+            log.info(e.getMessage());
             return Responser.serverError(e.getMessage());
         }
     }

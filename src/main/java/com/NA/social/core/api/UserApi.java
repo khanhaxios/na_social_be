@@ -30,6 +30,15 @@ public class UserApi {
         }
     }
 
+    @GetMapping("/by-email/{email}")
+    ResponseEntity<?> findUserByEmail(@PathVariable(name = "email") String email) {
+        try {
+            return userService.getByEmail(email);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
     @PutMapping
     ResponseEntity<?> updateProfile(@RequestBody UpdateUserProfileRequest request) {
         try {
