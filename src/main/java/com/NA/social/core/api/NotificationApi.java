@@ -23,7 +23,7 @@ public class NotificationApi {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    @GetMapping
+    @GetMapping("/get-all")
     ResponseEntity<?> getAllMyNotification(Pageable pageable) {
         try {
             User currentUser = SecurityHelper.getAccountFromLogged(userRepository);
