@@ -1,8 +1,6 @@
 package com.NA.social.core.api;
 
-import com.NA.social.core.request.feed.CreateCommentFeedRequest;
-import com.NA.social.core.request.feed.CreateFeedRequest;
-import com.NA.social.core.request.feed.UpdateFeedRequest;
+import com.NA.social.core.request.feed.*;
 import com.NA.social.core.service.feed.FeedService;
 import com.NA.social.core.ultis.Responser;
 import jakarta.validation.Valid;
@@ -81,10 +79,37 @@ public class FeedApi {
         }
     }
 
-    @PutMapping("/react-feed/{id}")
-    public ResponseEntity<?> commentFeed(@PathVariable(name = "id") Long feedId) {
+    @PutMapping("/react-feed")
+    public ResponseEntity<?> reactFeed(@Valid @RequestBody ReactFeedRequest request) {
         try {
-            return feedService.reactFeed(feedId);
+            return feedService.reactFeed(request);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+    @PostMapping("/share-feed")
+    public ResponseEntity<?> shareFeed(@Valid @RequestBody ShareFeedRequest request) {
+        try {
+            return feedService.shareFeed(request);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+    @GetMapping("/comments/get-root/{id}")
+    public ResponseEntity<?> getRootComment(@PathVariable(name = "id") long feedId, Pageable pageable) {
+        try {
+            return feedService.getAllFeedComment(feedId, pageable);
+        } catch (Exception e) {
+            return Responser.serverError(e.getMessage());
+        }
+    }
+
+    @GetMapping("/comments/get-child/{id}")
+    public ResponseEntity<?> getChildComment(@PathVariable(name = "id") long commentId, Pageable pageable) {
+        try {
+            return feedService.getAllChildComment(commentId, pageable);
         } catch (Exception e) {
             return Responser.serverError(e.getMessage());
         }

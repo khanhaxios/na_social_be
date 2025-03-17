@@ -1,13 +1,14 @@
 package com.NA.social.core.service.feed;
 
-import com.NA.social.core.request.feed.CreateCommentFeedRequest;
-import com.NA.social.core.request.feed.CreateFeedRequest;
-import com.NA.social.core.request.feed.UpdateFeedRequest;
+import com.NA.social.core.entity.Comment;
+import com.NA.social.core.request.feed.*;
 import com.NA.social.core.ultis.ApiResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface FeedService {
+
+    ResponseEntity<ApiResponse> getAllFeedComment(long feedId, Pageable pageable);
 
     ResponseEntity<ApiResponse> getNewsFeed(Pageable pageable);
 
@@ -23,5 +24,9 @@ public interface FeedService {
 
     ResponseEntity<ApiResponse> commentFeed(CreateCommentFeedRequest request);
 
-    ResponseEntity<ApiResponse> reactFeed(Long feedId);
+    ResponseEntity<ApiResponse> reactFeed(ReactFeedRequest request);
+
+    ResponseEntity<ApiResponse> shareFeed(ShareFeedRequest request);
+
+    ResponseEntity<ApiResponse> getAllChildComment(long parentId,Pageable pageable);
 }

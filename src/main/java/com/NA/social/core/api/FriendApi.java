@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @Slf4j
 public class FriendApi {
-
     private final FriendService friendService;
 
     @PostMapping("/send-add-friend-request/{id}")

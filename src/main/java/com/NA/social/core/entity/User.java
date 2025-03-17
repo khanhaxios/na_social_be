@@ -47,10 +47,10 @@ public class User implements UserDetails {
     private String verifyCode;
     private Instant verifyExpired;
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -2,13 +2,8 @@ package com.NA.social.core.service.feed;
 
 import com.NA.social.core.entity.*;
 import com.NA.social.core.enums.FeedPrivacy;
-import com.NA.social.core.repository.CommentRepository;
-import com.NA.social.core.repository.FeedRepository;
-import com.NA.social.core.repository.MediaRepository;
-import com.NA.social.core.repository.UserRepository;
-import com.NA.social.core.request.feed.CreateCommentFeedRequest;
-import com.NA.social.core.request.feed.CreateFeedRequest;
-import com.NA.social.core.request.feed.UpdateFeedRequest;
+import com.NA.social.core.repository.*;
+import com.NA.social.core.request.feed.*;
 import com.NA.social.core.ultis.ApiResponse;
 import com.NA.social.core.ultis.Responser;
 import com.NA.social.core.ultis.SecurityHelper;
@@ -22,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +32,16 @@ public class FeedServiceImpl implements FeedService {
 
     private final MediaRepository mediaRepository;
     private final UserRepository userRepository;
+    private final UserReactRepository userReactRepository;
+
+    @Override
+    public ResponseEntity<ApiResponse> getAllFeedComment(long feedId, Pageable pageable) {
+        Feed feed = feedRepository.findById(feedId).orElse(null);
+        if (feed == null) {
+            return Responser.notFound();
+        }
+        return Responser.success(commentRepository.findAllByFeedAndParentComment(pageable, feed, null));
+    }
 
     @Override
     public ResponseEntity<ApiResponse> getNewsFeed(Pageable pageable) {
@@ -43,8 +49,7 @@ public class FeedServiceImpl implements FeedService {
         if (currentUser == null) {
             return Responser.unAuth();
         }
-        return getMyFeed(pageable);
-//        return Responser.success(feedRepository.getNewsFeed(pageable, currentUser.getUid(), FeedPrivacy.PUBLIC));
+        return Responser.success(feedRepository.getNewsFeed(pageable, currentUser.getUid(), FeedPrivacy.ONLY_FRIEND));
     }
 
     @Override
@@ -89,11 +94,19 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public ResponseEntity<ApiResponse> deleteFeed(Long feedId) {
         Feed feed = feedRepository.findById(feedId).orElse(null);
-        if (feed != null) {
-            feed.setShowing(false);
-            feedRepository.save(feed);
+        User user = SecurityHelper.getAccountFromLogged(userRepository);
+        if (user == null) {
+            return Responser.unAuth();
         }
-        return Responser.success();
+        if (feed == null) {
+            return Responser.notFound();
+        }
+        if (!user.getUid().equals(feed.getAuthor().getUid())) {
+            return Responser.badRequest(List.of("This Feed Not Your"));
+        }
+        feed.setShowing(false);
+        feedRepository.save(feed);
+        return Responser.success(feed);
     }
 
     @Override
@@ -111,24 +124,57 @@ public class FeedServiceImpl implements FeedService {
         comment.setCommenter(user);
         comment.setParentComment(commentRepository.findById(request.getParentId()).orElse(null));
         Comment savedComment = commentRepository.save(comment);
-        feed.addComment(savedComment);
-        feedRepository.save(feed);
         return Responser.success(savedComment);
     }
 
     @Override
-    public ResponseEntity<ApiResponse> reactFeed(Long feedId) {
+    public ResponseEntity<ApiResponse> reactFeed(ReactFeedRequest request) {
         User user = SecurityHelper.getAccountFromLogged(userRepository);
-        Feed feed = feedRepository.findById(feedId).orElse(null);
+        Feed feed = feedRepository.findById(request.getFeedId()).orElse(null);
+
         if (user == null) {
             return Responser.unAuth();
         }
         if (feed == null) {
             return Responser.notFound();
         }
-        UserReact userReact = feed.getUserReacted().stream().filter(s -> s.getUserId().equals(user.getUid())).toList().get(0);
-        feed.addOrRemoveReaction(userReact);
-        feedRepository.save(feed);
-        return Responser.success();
+
+        boolean userHasReacted = userReactRepository.existsByUserAndFeed(user, feed);
+        if (userHasReacted) {
+            userReactRepository.deleteByUserAndFeed(user, feed);
+            feed.setReactCount(feed.getReactCount() - 1);
+            return Responser.success(feedRepository.save(feed));
+        }
+        UserReact userReact = UserReact.builder().user(user).feed(feed).feedReact(request.getFeedReact()).build();
+        userReactRepository.save(userReact);
+        feed.setReactCount(feed.getReactCount() + 1);
+        return Responser.success(feedRepository.save(feed));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> shareFeed(ShareFeedRequest request) {
+        User user = SecurityHelper.getAccountFromLogged(userRepository);
+        Feed feed = feedRepository.findById(request.getFeedId()).orElse(null);
+        if (user == null || feed == null) {
+            return Responser.notFound();
+        }
+        Feed myFeed = Feed.builder()
+                .caption(request.getCaption())
+                .privacy(request.getPrivacy())
+                .shareFrom(feed)
+                .author(user)
+                .media(feed.getMedia())
+                .showing(true)
+                .build();
+        return Responser.success(feedRepository.save(myFeed));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> getAllChildComment(long parentId, Pageable pageable) {
+        Comment comment = commentRepository.findById(parentId).orElse(null);
+        if (comment == null) {
+            return Responser.notFound();
+        }
+        return Responser.success(commentRepository.findAllByParentComment(pageable, comment));
     }
 }

@@ -1,41 +1,43 @@
 package com.NA.social.core.entity;
 
-import com.NA.social.core.conts.MediaContains;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class Media {
+@NoArgsConstructor
+public class Chat {
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private long Id;
+    private String name;
+    private boolean isGroup = false;
 
-    @Column(nullable = false)
-    private String path;
-    @Column(nullable = false)
-    private String name = MediaContains.UNKNOWN_MEDIA_NAME;
+    @ManyToOne
+    private User leader;
 
-    @Column(nullable = false)
-    private long size = 0;
+    @ManyToMany
+    private Set<User> subLeader = new HashSet<>();
 
-    private String type;
+    private int maxMember = 50;
+
     @CreationTimestamp
     private Instant createdAt;
 
     @UpdateTimestamp
     private Instant updatedAt;
+
 
 }

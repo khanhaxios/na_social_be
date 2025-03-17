@@ -1,19 +1,29 @@
 package com.NA.social.core.ultis;
 
+import com.NA.social.core.entity.Notification;
+import com.NA.social.core.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class NotificationHelper {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public  void sendNotification(String path, Object data) {
+    public void sendNotification(String path, Object data) {
         simpMessagingTemplate.convertAndSend(path, data);
     }
 
     public void sendNotificationToUser(String username, String path, Object data) {
         simpMessagingTemplate.convertAndSendToUser(username, "/queue" + path, data);
+    }
+
+    public void sendNotificationToUsers(List<Notification> notifications, String path) {
+        for (Notification notification : notifications) {
+            simpMessagingTemplate.convertAndSendToUser(notification.getOwner().getUsername(), "/queue" + path, notification);
+        }
     }
 }

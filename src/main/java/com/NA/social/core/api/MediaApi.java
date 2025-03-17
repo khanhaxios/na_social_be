@@ -4,12 +4,14 @@ import com.NA.social.core.service.media.MediaService;
 import com.NA.social.core.ultis.ApiResponse;
 import com.NA.social.core.ultis.Responser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
@@ -28,18 +30,18 @@ public class MediaApi {
     }
 
     @GetMapping("/download/{id}")
-    public ResponseEntity<?> downloadFile(@PathVariable(name = "id") long id) {
+    public ResponseEntity<?> downloadFile(@PathVariable(name = "id") long id, @RequestParam Map<String, String> params) {
         try {
-            return mediaService.downloadFile(id);
+            return mediaService.downloadFile(id, params);
         } catch (Exception e) {
             return Responser.serverError(e.getMessage());
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable(name = "id") long id) {
+    public ResponseEntity<?> getById(@PathVariable(name = "id") long id, @RequestParam Map<String, String> params) {
         try {
-            return mediaService.getById(id);
+            return mediaService.getById(id, params);
         } catch (Exception e) {
             return Responser.serverError(e.getMessage());
         }

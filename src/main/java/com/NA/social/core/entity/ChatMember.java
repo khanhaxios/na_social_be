@@ -1,38 +1,38 @@
 package com.NA.social.core.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class Comment {
+@NoArgsConstructor
+public class ChatMember {
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private long Id;
-
-    private String content;
     @ManyToOne
-    private User commenter;
-
+    private User user;
     @ManyToOne
-    private Feed feed;
-
-    @ManyToOne
-    @Nullable
-    private Comment parentComment;
+    private Chat chat;
+    private Instant joinedAt;
+    private boolean isMuted;
+    private boolean isBanned;
+    private long timeMuted;
+    private long timeBaned;
 
     @CreationTimestamp
     private Instant createdAt;
+
     @UpdateTimestamp
     private Instant updatedAt;
 }
