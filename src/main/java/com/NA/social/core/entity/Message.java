@@ -32,8 +32,11 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private MessageStatus messageStatus = MessageStatus.SENT;
 
+    @OneToMany
+    private Set<MessageReact> messageReacts = new HashSet<>();
     @ManyToOne
     private User replyTo;
+    private boolean redirected = false;
 
     @OneToMany
     private Set<Media> media = new HashSet<>();
@@ -45,4 +48,10 @@ public class Message {
 
     @UpdateTimestamp
     private Instant updatedAt;
+    public void addReact(MessageReact messageReact){
+        this.messageReacts.add(messageReact);
+    }
+    public void removeReact(MessageReact react){
+        this.messageReacts.remove(react);
+    }
 }

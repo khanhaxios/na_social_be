@@ -37,8 +37,6 @@ public class SecurityHelper {
     public static User getAccountFromLogged(UserRepository accountRepository) {
         String username = SecurityHelper.getLoggedUser();
         if (username == null) return null;
-        User account = accountRepository.findByUsername(username).orElse(null);
-        if (account == null) return null;
-        return account;
+        return accountRepository.findByUsername(username).orElse(null);
     }
 }

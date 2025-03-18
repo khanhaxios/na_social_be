@@ -1,5 +1,5 @@
 package com.NA.social.core.enums;
 
 public enum MessageStatus {
-    DELIVERED, SENT, READ
+    DELIVERED, SENT, READ, RECALL
 }
